@@ -16,3 +16,4 @@ namespace RegistroDeJugadores.Models
         public int Partidas { get; set; }
     }
 }
+

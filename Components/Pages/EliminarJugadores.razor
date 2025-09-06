@@ -1,0 +1,57 @@
+﻿@page "/Jugador/Delete/{JugadorId:int}"
+@inject RegistroDeJugadores.Services.JugadoresServices jugadoresService
+@inject NavigationManager navigationManager
+@inject Blazored.Toast.Services.IToastService toastService
+
+<PageTitle>Eliminar Jugador</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5><strong>Datos del Jugador</strong></h5>
+        </div>
+
+        <div class="card-body">
+            <div class="text-center">
+                <h5><strong>¿Desea eliminar este jugador?</strong></h5>
+            </div>
+            <ul class="mt-4">
+                <li><strong>JugadorId: </strong>@Jugador.JugadorId</li>
+                <li><strong>Nombre: </strong>@Jugador.Nombres</li>
+                <li><strong>Partidas: </strong>@Jugador.Partidas</li>
+            </ul>
+        </div>
+
+        <div class="card-footer text-center">
+            <a href="/Jugadores/Index" class="btn btn-primary">Volver</a>
+            <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int JugadorId { get; set; }
+
+    public Jugadores Jugador { get; set; } = new Jugadores();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Jugador = await jugadoresService.Buscar(JugadorId);
+    }
+
+    public async Task Eliminar()
+    {
+        var eliminado = await jugadoresService.Eliminar(Jugador.JugadorId);
+
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Jugador eliminado correctamente");
+            navigationManager.NavigateTo("/Jugadores/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar al jugador");
+        }
+    }
+}

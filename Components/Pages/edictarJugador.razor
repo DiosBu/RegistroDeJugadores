@@ -1,0 +1,82 @@
+﻿@page "/Jugador/Edit/{JugadorId:int}"
+@inject RegistroDeJugadores.Services.JugadoresServices jugadoresService
+@inject NavigationManager navigationManager
+@inject Blazored.Toast.Services.IToastService toastService
+
+<PageTitle>Modificar Jugador</PageTitle>
+
+<EditForm Model="Jugador" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Modificar Jugador</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>JugadorId</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Jugador.JugadorId" Disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombres</strong></label>
+                    <InputText class="form-control" @bind-Value="Jugador.Nombres" />
+                    <ValidationMessage For="(() => Jugador.Nombres)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Partidas</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Jugador.Partidas" />
+                    <ValidationMessage For="(() => Jugador.Partidas)" />
+                </div>
+            </div>
+
+            <div class="card-footer text-center mt-2">
+                <a href="/Jugadores/Index" class="btn btn-secondary">Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy">Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int JugadorId { get; set; }
+
+    public Jugadores Jugador { get; set; } = new Jugadores();
+    public string ErrorNombre { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Jugador = await jugadoresService.Buscar(JugadorId);
+    }
+
+    public async Task Modificar()
+    {
+        ErrorNombre = string.Empty;
+
+        var existeOtro = (await jugadoresService.Listar(j =>
+            j.Nombres == Jugador.Nombres && j.JugadorId != Jugador.JugadorId)).Any();
+        if (existeOtro)
+        {
+            ErrorNombre = "Ya existe un jugador con ese nombre.";
+            toastService.ShowError(ErrorNombre);
+            return;
+        }
+
+        var ok = await jugadoresService.Guardar(Jugador);
+        if (ok)
+        {
+            toastService.ShowSuccess("Jugador modificado correctamente");
+            navigationManager.NavigateTo("/Jugadores/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo modificar al jugador");
+        }
+    }
+}
+

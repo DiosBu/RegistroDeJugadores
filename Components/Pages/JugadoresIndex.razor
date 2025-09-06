@@ -1,0 +1,105 @@
+﻿@page "/Jugadores/Index"
+@using RegistroDeJugadores.Models
+@inject NavigationManager Navigation
+@inject RegistroDeJugadores.Services.JugadoresServices jugadoresServices
+
+<PageTitle>Registro de Jugadores</PageTitle>
+
+<h3 class="mb-3">Jugadores</h3>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title m-0">Consulta de Jugadores</h5>
+            <a href="/Jugadores/Create" class="btn btn-primary">
+                <span class="bi bi-plus-square"></span> Crear
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-3">
+                    <label class="form-label"><strong>Filtrar por</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opción</option>
+                        <option value="Nombres">Nombres</option>
+                        <option value="JugadorId">ID</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-5">
+                    <label class="form-label"><strong>Búsqueda</strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar..." />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-hover">
+                    <thead class="table table-striped text-black">
+                        <tr>
+                            <th>JugadorId</th>
+                            <th>Nombres</th>
+                            <th>Partidas</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var j in ListaJugadores)
+                        {
+                            <tr>
+                                <td>@j.JugadorId</td>
+                                <td>@j.Nombres</td>
+                                <td>@j.Partidas</td>
+                                <td class="text-center">
+                                    <a href="/Jugador/Edit/@j.JugadorId" class="btn btn-outline-primary bi bi-pencil-square" title="Editar"></a>
+                                    <a href="/Jugador/Delete/@j.JugadorId" class="btn btn-outline-danger bi bi-trash" title="Eliminar"></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <label>Cantidad: @ListaJugadores.Count()</label>
+            <label>Total Partidas: @ListaJugadores.Sum(x => x.Partidas)</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Jugadores> ListaJugadores { get; set; } = new();
+
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaJugadores = await jugadoresServices.Listar(j => j.JugadorId > 0);
+    }
+
+    private async Task Buscar()
+    {
+        if (!string.IsNullOrWhiteSpace(ValorFiltro) && Filtro == "Nombres")
+        {
+            var v = ValorFiltro.ToLower();
+            ListaJugadores = await jugadoresServices.Listar(j => j.Nombres.ToLower().Contains(v));
+        }
+        else if (!string.IsNullOrWhiteSpace(ValorFiltro) && Filtro == "JugadorId")
+        {
+            if (int.TryParse(ValorFiltro, out var id))
+            {
+                ListaJugadores = await jugadoresServices.Listar(j => j.JugadorId == id);
+            }
+        }
+        else
+        {
+            ListaJugadores = await jugadoresServices.Listar(j => j.JugadorId > 0);
+        }
+    }
+}
+

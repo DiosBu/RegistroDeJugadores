@@ -1,0 +1,74 @@
+﻿@page "/Jugadores/Create"
+@using RegistroDeJugadores.Models
+@inject NavigationManager Navigation
+@inject RegistroDeJugadores.Services.JugadoresServices jugadoresServices
+@inject Blazored.Toast.Services.IToastService toastServices
+
+<h3 class="mb-3">CreadorDeJugadores</h3>
+
+<EditForm Model="Jugador" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Jugador</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombres</strong></label>
+                    <InputText class="form-control" @bind-Value="Jugador.Nombres" />
+                    <ValidationMessage For="(() => Jugador.Nombres)" />
+                    @if (!string.IsNullOrEmpty(ErrorNombre))
+                    {
+                        <div class="text-danger mt-1">@ErrorNombre</div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Partidas</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Jugador.Partidas" />
+                    <ValidationMessage For="(() => Jugador.Partidas)" />
+                </div>
+            </div>
+
+            <div class="card-footer text-center mt-2">
+                <a href="/" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Jugadores Jugador { get; set; } = new() { Partidas = 0 };
+    public string ErrorNombre { get; set; } = string.Empty;
+
+    private async Task Guardar()
+    {
+        ErrorNombre = string.Empty;
+
+        var existe = (await jugadoresServices.Listar(j => j.Nombres == Jugador.Nombres)).Any();
+        if (existe)
+        {
+            ErrorNombre = "Ya existe un jugador con ese nombre.";
+            toastServices.ShowError(ErrorNombre);
+            return;
+        }
+
+        var ok = await jugadoresServices.Guardar(Jugador);
+        if (ok)
+        {
+            toastServices.ShowSuccess("Se ha guardado correctamente");
+            Navigation.NavigateTo("/"); // Home
+        }
+        else
+        {
+            toastServices.ShowError("No se pudo guardar correctamente");
+        }
+    }
+}
