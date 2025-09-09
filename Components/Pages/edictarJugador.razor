@@ -1,7 +1,6 @@
 ﻿@page "/Jugador/Edit/{JugadorId:int}"
 @inject RegistroDeJugadores.Services.JugadoresServices jugadoresService
 @inject NavigationManager navigationManager
-@inject Blazored.Toast.Services.IToastService toastService
 
 <PageTitle>Modificar Jugador</PageTitle>
 
@@ -62,20 +61,13 @@
             j.Nombres == Jugador.Nombres && j.JugadorId != Jugador.JugadorId)).Any();
         if (existeOtro)
         {
-            ErrorNombre = "Ya existe un jugador con ese nombre.";
-            toastService.ShowError(ErrorNombre);
             return;
         }
 
         var ok = await jugadoresService.Guardar(Jugador);
         if (ok)
         {
-            toastService.ShowSuccess("Jugador modificado correctamente");
             navigationManager.NavigateTo("/Jugadores/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo modificar al jugador");
         }
     }
 }

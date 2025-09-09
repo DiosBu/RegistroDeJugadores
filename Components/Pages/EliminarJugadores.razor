@@ -1,7 +1,6 @@
 ﻿@page "/Jugador/Delete/{JugadorId:int}"
 @inject RegistroDeJugadores.Services.JugadoresServices jugadoresService
 @inject NavigationManager navigationManager
-@inject Blazored.Toast.Services.IToastService toastService
 
 <PageTitle>Eliminar Jugador</PageTitle>
 
@@ -46,12 +45,8 @@
 
         if (eliminado)
         {
-            toastService.ShowSuccess("Jugador eliminado correctamente");
             navigationManager.NavigateTo("/Jugadores/Index");
         }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar al jugador");
-        }
+       
     }
 }

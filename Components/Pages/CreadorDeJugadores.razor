@@ -2,7 +2,6 @@
 @using RegistroDeJugadores.Models
 @inject NavigationManager Navigation
 @inject RegistroDeJugadores.Services.JugadoresServices jugadoresServices
-@inject Blazored.Toast.Services.IToastService toastServices
 
 <h3 class="mb-3">CreadorDeJugadores</h3>
 
@@ -53,22 +52,11 @@
         ErrorNombre = string.Empty;
 
         var existe = (await jugadoresServices.Listar(j => j.Nombres == Jugador.Nombres)).Any();
-        if (existe)
-        {
-            ErrorNombre = "Ya existe un jugador con ese nombre.";
-            toastServices.ShowError(ErrorNombre);
-            return;
-        }
 
         var ok = await jugadoresServices.Guardar(Jugador);
         if (ok)
         {
-            toastServices.ShowSuccess("Se ha guardado correctamente");
             Navigation.NavigateTo("/"); // Home
-        }
-        else
-        {
-            toastServices.ShowError("No se pudo guardar correctamente");
         }
     }
 }
